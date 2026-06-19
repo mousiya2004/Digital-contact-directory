@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContactVault</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface2: #f0f2f8;
+  --border: #dde1ef;
+  --accent: #5b45e0;
+  --accent2: #e8453c;
+  --accent3: #00a882;
+  --text: #1a1d2e;
+  --muted: #7b82a0;
+  --card-glow: rgba(91,69,224,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(91,69,224,0.07) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px; left: -200px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,168,130,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+.page {
+  position: relative; z-index: 1;
+  max-width: 520px; margin: 0 auto;
+  padding: 40px 20px; min-height: 100vh;
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 1.6rem;
+  letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 40px; color: var(--text);
+}
+.logo span { color: var(--accent); }
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--accent3);
+  border-radius: 50%; margin-left: 2px;
+  display: inline-block; animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.8); }
+}
+#authBox { animation: fadeUp 0.5s ease; }
+#appBox { animation: fadeUp 0.4s ease; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.auth-header { margin-bottom: 32px; }
+.auth-header h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 2.4rem; line-height: 1.1; margin-bottom: 8px; color: var(--text);
+}
+.auth-header h1 em { font-style: normal; color: var(--accent); }
+.auth-header p { color: var(--muted); font-size: 0.95rem; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(91,69,224,0.06);
+}
+.field { position: relative; margin-bottom: 14px; }
+.field label {
+  display: block; font-size: 0.75rem; font-weight: 500;
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 6px;
+}
+.field input {
+  width: 100%; background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+}
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(91,69,224,0.12);
+}
+.field input::placeholder { color: var(--muted); }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.btn {
+  padding: 12px; border: none; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  font-weight: 500; cursor: pointer; transition: all 0.2s; letter-spacing: 0.2px;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover {
+  background: #4a37c4; transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(91,69,224,0.3);
+}
+.btn-secondary {
+  background: var(--surface2); color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.top-bar {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 28px;
+}
+.user-chip {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 8px 14px; border-radius: 50px; font-size: 0.85rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 0.75rem;
+  font-weight: 700; color: white;
+}
+.btn-logout {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); padding: 8px 14px; border-radius: 50px;
+  font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-logout:hover { border-color: var(--accent2); color: var(--accent2); }
+.section-title {
+  font-family: 'Syne', sans-serif; font-size: 0.7rem;
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px;
+}
+.search-wrap { position: relative; margin-bottom: 12px; }
+.search-icon {
+  position: absolute; left: 14px; top: 50%;
+  transform: translateY(-50%); color: var(--muted); font-size: 1rem;
+}
+.search-wrap input {
+  width: 100%; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px 12px 40px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  outline: none; transition: border-color 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-wrap input::placeholder { color: var(--muted); }
+.contact-list { display: flex; flex-direction: column; gap: 8px; }
+.contact-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px;
+  display: flex; align-items: center; gap: 14px;
+  transition: all 0.2s; animation: slideIn 0.3s ease;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+@keyframes slideIn {
+  from { opacity:0; transform:translateX(-10px); }
+  to { opacity:1; transform:translateX(0); }
+}
+.contact-card:hover {
+  border-color: #c8cfe8;
+  box-shadow: 0 4px 18px rgba(91,69,224,0.1);
+}
+.contact-avatar {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), #9b80ff);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 1rem; color: white; flex-shrink: 0;
+}
+.contact-info { flex: 1; min-width: 0; }
+.contact-name {
+  font-family: 'Syne', sans-serif; font-weight: 600;
+  font-size: 0.95rem; margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
+}
+.contact-detail {
+  font-size: 0.78rem; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.contact-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.action-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; transition: all 0.2s;
+}
+.action-btn.edit:hover { background: rgba(91,69,224,0.1); color: var(--accent); border-color: var(--accent); }
+.action-btn.del:hover { background: rgba(232,69,60,0.1); color: var(--accent2); border-color: var(--accent2); }
+.empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+.empty-state p { font-size: 0.9rem; }
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-chip {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.stat-icon { font-size: 1.2rem; }
+.stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--accent3); }
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 18px;
+  font-size: 0.85rem; display: flex; align-items: center; gap: 10px;
+  z-index: 1000; transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-left: 3px solid var(--accent3);
+  color: var(--text); box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-left-color: var(--accent2); }
+.hidden { display: none !important; }
+.form-card.editing { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,69,224,0.1); }
+.edit-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(91,69,224,0.1); color: var(--accent);
+  border-radius: 6px; padding: 3px 10px;
+  font-size: 0.75rem; font-weight: 500; margin-bottom: 14px;
+}
+.btn-add {
+  width: 100%; background: var(--accent); color: white;
+  padding: 13px; border-radius: 10px; border: none;
+  font-family: 'Syne', sans-serif; font-weight: 600;
+  font-size: 0.9rem; letter-spacing: 0.3px;
+  cursor: pointer; transition: all 0.2s; margin-top: 4px;
+}
+.btn-add:hover {
+  background: #4a37c4; transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(91,69,224,0.3);
+}
+.btn-cancel {
+  width: 100%; background: transparent; color: var(--muted);
+  padding: 10px; border: none; font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; cursor: pointer; margin-top: 6px;
+  border-radius: 8px; transition: color 0.2s;
+}
+.btn-cancel:hover { color: var(--accent2); }
+.sort-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 12px; flex-wrap: wrap;
+}
+.sort-label {
+  font-size: 0.72rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  font-weight: 500; margin-right: 2px;
+}
+.sort-btn {
+  padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+}
+.sort-btn:hover { border-color: var(--accent); color: var(--accent); }
+.sort-btn.active {
+  background: var(--accent); border-color: var(--accent);
+  color: white; font-weight: 500;
+}
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(180,185,210,0.5);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-overlay.show { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 32px 28px 24px;
+  max-width: 340px; width: 90%; text-align: center;
+  transform: scale(0.85) translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 24px 60px rgba(91,69,224,0.15);
+}
+.modal-overlay.show .modal-box { transform: scale(1) translateY(0); }
+.modal-icon { font-size: 2.8rem; margin-bottom: 14px; animation: shake 0.5s ease 0.2s both; }
+@keyframes shake {
+  0%,100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+.modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.15rem; margin-bottom: 8px; color: var(--text); }
+.modal-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; line-height: 1.5; }
+.modal-name { color: var(--text); font-weight: 500; }
+.modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-keep {
+  padding: 12px; border-radius: 10px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+}
+.modal-keep:hover { border-color: var(--accent); color: var(--accent); }
+.modal-confirm {
+  padding: 12px; border-radius: 10px; border: none;
+  background: var(--accent2); color: white;
+  font-family: 'Syne', sans-serif; font-weight: 600;
+  font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+}
+.modal-confirm:hover { background: #cc2f27; box-shadow: 0 4px 16px rgba(232,69,60,0.3); }
+.contact-card.deleting { animation: cardOut 0.35s ease forwards; }
+@keyframes cardOut {
+  0% { opacity:1; transform:translateX(0) scale(1); max-height:100px; margin-bottom:8px; }
+  60% { opacity:0; transform:translateX(60px) scale(0.95); max-height:100px; }
+  100% { opacity:0; max-height:0; margin-bottom:0; padding:0; }
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="page" id="authBox">
+  <div class="logo">Contact<span>Vault</span><span class="logo-dot"></span></div>
+  <div class="auth-header">
+    <h1>Your contacts,<br><em>organised.</em></h1>
+    <p>Sign in or create an account to manage your directory.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="e.g. john_doe" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="register()">Register</button>
+      <button class="btn btn-primary" onclick="login()">Login →</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="page hidden" id="appBox">
+  <div class="logo">Contact<span>Vault</span><span class="logo-dot"></span></div>
+  <div class="top-bar">
+    <div class="user-chip">
+      <div class="avatar" id="avatarInitial">?</div>
+      <span id="welcome"></span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sign out</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat-chip">
+      <span class="stat-icon">👥</span>
+      <div>
+        <div class="stat-label">Contacts</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-icon">🔍</span>
+      <div>
+        <div class="stat-label">Showing</div>
+        <div class="stat-value" id="statShowing">0</div>
+      </div>
+    </div>
+  </div>
+  <div class="card form-card" id="formCard" style="margin-bottom:12px">
+    <div class="edit-badge hidden" id="editBadge">✏️ Editing contact</div>
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="cName" placeholder="Jane Smith">
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="text" id="cPhone" placeholder="+91 98765 43210">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="text" id="cEmail" placeholder="jane@example.com">
+    </div>
+    <button class="btn-add" id="submitBtn" onclick="submitContact()">＋ Add Contact</button>
+    <button class="btn-cancel hidden" id="cancelBtn" onclick="cancelEdit()">Cancel</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="Search by name, phone or email…" oninput="render()">
+  </div>
+  <div class="sort-row">
+    <span class="sort-label">Sort by</span>
+    <button class="sort-btn active" id="sortName" onclick="setSort('name')">A → Z</button>
+    <button class="sort-btn" id="sortNameDesc" onclick="setSort('nameDesc')">Z → A</button>
+    <button class="sort-btn" id="sortNewest" onclick="setSort('newest')">Newest</button>
+    <button class="sort-btn" id="sortOldest" onclick="setSort('oldest')">Oldest</button>
+  </div>
+  <div class="section-title" style="margin-top:14px">Directory</div>
+  <div class="contact-list" id="list"></div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title">Delete Contact?</div>
+    <div class="modal-sub">Are you sure you want to remove <span class="modal-name" id="modalName"></span>? This cannot be undone.</div>
+    <div class="modal-btns">
+      <button class="modal-keep" onclick="closeDeleteModal()">Keep it</button>
+      <button class="modal-confirm" onclick="confirmDelete()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastIcon">✓</span>
+  <span id="toastMsg">Done</span>
+</div>
+
+<script>
+let currentUser=null,contacts=[],editIndex=-1;
+
+function toast(msg,error=false){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIcon').textContent=error?'✕':'✓';
+  t.classList.toggle('error',error);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function register(){
+  const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value.trim();
+  if(!u||!p)return toast('Please fill in both fields',true);
+  if(localStorage.getItem('user_'+u))return toast('Username already taken',true);
+  localStorage.setItem('user_'+u,p);
+  toast('Account created! You can now log in.');
+}
+
+function login(){
+  const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value.trim();
+  if(!u||!p)return toast('Enter your credentials',true);
+  const stored=localStorage.getItem('user_'+u);
+  if(stored===p){currentUser=u;startApp();}
+  else{toast('Incorrect username or password',true);}
+}
+
+function logout(){currentUser=null;location.reload();}
+
+function startApp(){
+  document.getElementById('authBox').classList.add('hidden');
+  document.getElementById('appBox').classList.remove('hidden');
+  document.getElementById('welcome').textContent=currentUser;
+  document.getElementById('avatarInitial').textContent=currentUser[0].toUpperCase();
+  load();render();
+}
+
+function load(){contacts=JSON.parse(localStorage.getItem('contacts_'+currentUser)||'[]');}
+function save(){localStorage.setItem('contacts_'+currentUser,JSON.stringify(contacts));}
+
+function submitContact(){
+  const n=document.getElementById('cName').value.trim(),ph=document.getElementById('cPhone').value.trim(),em=document.getElementById('cEmail').value.trim();
+  if(!n||!ph||!em)return toast('Please fill in all fields',true);
+  if(editIndex>=0){
+    contacts[editIndex]={name:n,phone:ph,email:em,added:contacts[editIndex].added};
+    toast('Contact updated');cancelEdit();
+  }else{
+    contacts.push({name:n,phone:ph,email:em,added:Date.now()});
+    toast('Contact added');
+    document.getElementById('cName').value='';
+    document.getElementById('cPhone').value='';
+    document.getElementById('cEmail').value='';
+  }
+  save();render();
+}
+
+function editContact(i){
+  const c=contacts[i];
+  document.getElementById('cName').value=c.name;
+  document.getElementById('cPhone').value=c.phone;
+  document.getElementById('cEmail').value=c.email;
+  editIndex=i;
+  document.getElementById('submitBtn').textContent='✓ Update Contact';
+  document.getElementById('editBadge').classList.remove('hidden');
+  document.getElementById('cancelBtn').classList.remove('hidden');
+  document.getElementById('formCard').classList.add('editing');
+  document.getElementById('cName').focus();
+}
+
+function cancelEdit(){
+  editIndex=-1;
+  document.getElementById('cName').value='';
+  document.getElementById('cPhone').value='';
+  document.getElementById('cEmail').value='';
+  document.getElementById('submitBtn').textContent='＋ Add Contact';
+  document.getElementById('editBadge').classList.add('hidden');
+  document.getElementById('cancelBtn').classList.add('hidden');
+  document.getElementById('formCard').classList.remove('editing');
+}
+
+let currentSort='name';
+function setSort(type){
+  currentSort=type;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sort'+type.charAt(0).toUpperCase()+type.slice(1)).classList.add('active');
+  render();
+}
+
+let deleteTargetIndex=-1;
+function deleteContact(i){
+  deleteTargetIndex=i;
+  document.getElementById('modalName').textContent='"'+contacts[i].name+'"';
+  document.getElementById('deleteModal').classList.add('show');
+}
+function closeDeleteModal(){
+  document.getElementById('deleteModal').classList.remove('show');
+  deleteTargetIndex=-1;
+}
+function confirmDelete(){
+  if(deleteTargetIndex<0)return;
+  const name=contacts[deleteTargetIndex].name,cardId='card-'+deleteTargetIndex;
+  closeDeleteModal();
+  const card=document.getElementById(cardId);
+  if(card){
+    card.classList.add('deleting');
+    setTimeout(()=>{contacts.splice(deleteTargetIndex,1);deleteTargetIndex=-1;save();render();toast(name+' removed');},340);
+  }else{
+    contacts.splice(deleteTargetIndex,1);deleteTargetIndex=-1;save();render();toast(name+' removed');
+  }
+}
+
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const filtered=contacts.filter(c=>
+    c.name.toLowerCase().includes(q)||
+    c.phone.toLowerCase().includes(q)||
+    c.email.toLowerCase().includes(q)
+  );
+  document.getElementById('statTotal').textContent=contacts.length;
+  document.getElementById('statShowing').textContent=filtered.length;
+  const list=document.getElementById('list');
+  if(filtered.length===0){
+    list.innerHTML=`<div class="empty-state"><div class="icon">${contacts.length===0?'📋':'🔎'}</div><p>${contacts.length===0?'No contacts yet. Add your first one above.':'No contacts match your search.'}</p></div>`;
+    return;
+  }
+  let sorted=[...filtered];
+  if(currentSort==='name')sorted.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(currentSort==='nameDesc')sorted.sort((a,b)=>b.name.localeCompare(a.name));
+  else if(currentSort==='newest')sorted.sort((a,b)=>(b.added||0)-(a.added||0));
+  else if(currentSort==='oldest')sorted.sort((a,b)=>(a.added||0)-(b.added||0));
+  list.innerHTML=sorted.map((c,i)=>{
+    const realIndex=contacts.indexOf(c);
+    const initials=c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const colors=['#5b45e0,#9b80ff','#e8453c,#ff8c5a','#00a882,#00c4ff','#d4921a,#e8b84b'];
+    const grad=colors[i%colors.length];
+    return`<div class="contact-card" id="card-${realIndex}">
+      <div class="contact-avatar" style="background:linear-gradient(135deg,${grad})">${initials}</div>
+      <div class="contact-info">
+        <div class="contact-name">${c.name}</div>
+        <div class="contact-detail">${c.phone} · ${c.email}</div>
+      </div>
+      <div class="contact-actions">
+        <button class="action-btn edit" onclick="editContact(${realIndex})" title="Edit">✎</button>
+        <button class="action-btn del" onclick="deleteContact(${realIndex})" title="Delete">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
